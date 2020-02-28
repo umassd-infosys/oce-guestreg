@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cart Management Proof of Concept</title>
+    <script
+            src="https://code.jquery.com/jquery-3.4.1.min.js"
+            crossorigin="anonymous"></script>
+    <script src="cart.js"></script>
+</head>
+<body>
+<div class="oce-guestreg-cart" style="'display:none">
+    <div class="oce-guestreg-cart-contents">
+        You have
+        <span class="oce-guestreg-cart-contents-number"></span>
+        course<span class="oce-guestreg-cart-contents-plural">s</span>
+        in your cart:
+        <ul class="oce-guestreg-cart-contents-list">
+        </ul>
+    </div>
+    <div class="oce-guestreg-cart-checkout">
+        <a class="btn btn-auto-icon fa-shopping-cart btn-success oce-checkout btn-lg oce-guestreg-cart-checkout-link" href="javascript:oceGuestRegistration.checkout();">
+            Check Out
+        </a>
+    </div>
+</div>
+</body>
+</html>
