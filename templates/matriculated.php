@@ -1,5 +1,5 @@
 <?php
-require_once('../settings.php');
+require_once(__DIR__.'/../settings.php');
 include('header.php');
 ?>
 <!-- HTML Stub for Students who should just use COIN to Register -->

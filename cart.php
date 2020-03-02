@@ -1,5 +1,4 @@
 <?php
-session_start();
 require_once('settings.php');
 
 if(!isset($_SESSION['OCE']) || isset($_GET['empty'])) {
@@ -24,12 +23,15 @@ if (isset($_GET['add'])) {
         return false;
     }
 
-
-    $db = parse_url(getenv('DATABASE_URL'));
-    $db['path'] = trim($db['path'], '/');
-    $dsn = "pgsql:host={$db['host']};port={$db['port']};dbname={$db['path']};sslmode=prefer";
-    $db = new PDO($dsn, $db['user'], $db['pass']);
-
+    try {
+        $db = parse_url(getenv('DATABASE_URL'));
+        $db['path'] = trim($db['path'], '/');
+        $dsn = "pgsql:host={$db['host']};port={$db['port']};dbname={$db['path']};sslmode=prefer";
+        $db = new PDO($dsn, $db['user'], $db['pass']);
+    } catch(Exception $exception) {
+        require_once('pdoconnect.php');
+        $db = pgsql_connect('heroku');
+    }
     $query = "select * from peoplesoft.ps_courses where crs_term=:term and crs_class_number=:class;";
     $sel_course = $db->prepare($query);
     $sel_course->bindParam('term', $courseParts[0], PDO::PARAM_STR);
@@ -72,6 +74,7 @@ if (isset($_GET['add'])) {
 } else if (isset($_GET['checkout'])) {
     //the email is the value of 'checkout' and is the recipient's email address
     $email = filter_input(INPUT_GET,'checkout',FILTER_VALIDATE_EMAIL);
+    $fullname = filter_input(INPUT_GET,'fullname',FILTER_SANITIZE_STRING);
     if(!$email) {
         if($_REQUEST['source'] && !strcasecmp('iframe',$_REQUEST['source'])) {
             echo "<p class='alert alert-danger'>Please enter a valid email address.</p>";
@@ -88,7 +91,7 @@ if (isset($_GET['add'])) {
             header('Location: auth/index.php');
             die;
         }
-        return oceCheckout($email, 'GUEST', 'html');
+        return oceCheckout($email,$fullname, 'GUEST', 'html');
     }
 } else if(isset($_GET['deeplink'])) {
     //DERIVED_REGFRM1_CLASS_NBR

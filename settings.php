@@ -1,14 +1,19 @@
 <?php
+session_start();
+
 /* Settings for OCE Guest Registration Process */
 
 /* Will need some prod/dev switch logic here */
-if(isset($_ENV['PROD_SERVER']) && !strcasecmp($_ENV['PROD_SERVER'],'YES')) {
+//if(isset($_ENV['PROD_SERVER']) && !strcasecmp($_ENV['PROD_SERVER'],'YES')) {
+/* Production End Points */
     define('OCE_GUESTCHECKOUT', 'http://webapps.umassd.edu/esig/templates/oce_guest_reg.php');
     define('OCE_DAYCHECKOUT', 'https://webapps.umassd.edu/esig/templates/oce_day_reg.php');
-} else {
+/*
+DEVELOPMENT
     define('OCE_GUESTCHECKOUT', 'http://sandcastle.umassd.edu/mrobinson/docusign/esig/templates/oce_guest_reg.php');
     define('OCE_DAYCHECKOUT', 'https://sandcastle.umassd.edu/mrobinson/docusign/esig/auth/oce_day_reg.php');
 }
+*/
 /* Maximum number of courses that may be used for this tool */
 define('OCE_HOME','https://www.umassd.edu/online/courses');
 define('OCE_MAXCOURSES',3);
@@ -19,7 +24,7 @@ if(isset($_REQUEST['iframe'])) {
 }
 
 
-function oceCheckout($email,$type='GUEST',$cb='') {
+function oceCheckout($email,$name,$type='GUEST',$cb='') {
     if(!strcasecmp($type,'DAY')) {
         $url = OCE_DAYCHECKOUT;
     } else {
@@ -34,8 +39,10 @@ function oceCheckout($email,$type='GUEST',$cb='') {
     $c = array_unique($c);
     $courses = implode(',',$c);
     $id = uniqid();
-    $docusignUrl = $url."?email={$email}&oce_gr_id={$id}&courses={$courses}";
+    $docusignUrl = $url."?name={$name}&email={$email}&oce_gr_id={$id}&courses={$courses}";
     file_get_contents($docusignUrl);
+    $_SESSION['OCE'] = ['maxCourses'=>OCE_MAXCOURSES,'n'=>0,'courses'=>[],'term'=>''];
+
     /* Handle possible callback */
     if(empty($cb)) {
         echoOut(null, 'OK ' . $docusignUrl);
@@ -57,6 +64,7 @@ function echoOut($error=null,$msg=null) {
     if($msg!=null) {
         $data['message'] = $msg;
     }
+    header("Access-Control-Allow-Origin: *");
     echo $_GET['callback'] . "(" . json_encode($data) .");";
 }
 

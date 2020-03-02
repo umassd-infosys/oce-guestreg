@@ -22,7 +22,7 @@ if(isset($_ENV['DATABASE_URL'])) {
     $db = pgsql_connect('heroku');
 }
 $query = <<< _Q_
-select spp_program,spp_plan from peoplesoft.ps_student_program_plan
+select spp_program,spp_plan,displayname from peoplesoft.ps_student_program_plan
 join infrastructure.ad_userinfo on umassisisid=spp_emplid
 where spp_program_status='AC' and samaccountname=:username
 _Q_;
@@ -30,9 +30,11 @@ $sel_program_plan = $db->prepare($query);
 $sel_program_plan->bindParam('username',$user,PDO::PARAM_STR);
 $sel_program_plan->execute() or die ('could not execute query');
 $program_plan = $sel_program_plan->fetchAll(PDO::FETCH_ASSOC);
+$displayName = $user;
 $hasProgramPlan = false;
 foreach($program_plan as $pp) {
     $hasProgramPlan = true;
+    $displayName = $pp['displayname'];
     if(isOCEProgramPlan($pp['spp_program'],$pp['spp_plan'])==true) {
         //Online Students cannot use this system -- must go into umassd
         require_once('../templates/matriculated.php');
@@ -49,10 +51,10 @@ if($hasProgramPlan==true && ($lastTwoOfTerm==20 || $lastTwoOfTerm==40)) {
 
 }  else if($hasProgramPlan) {
     /* This person has a program plan stack AND it isn't for Winter or Summer, so give them the day school form */
-    oceCheckout($user.'@umassd.edu','DAY');
+    oceCheckout($user.'@umassd.edu',$displayName,'DAY');
 }
 /* if we got here, we should be good to go for the GUEST form */
-oceCheckout($user.'@umassd.edu','GUEST','html');
+oceCheckout($user.'@umassd.edu',$displayName,'GUEST','html');
 
 function isOCEProgramPlan($program,$plan) {
     $ocePlanTypes = ['OGC','OLBS','OLBA','OGP','OLCT','OLMN'];

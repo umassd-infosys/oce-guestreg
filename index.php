@@ -1,5 +1,5 @@
 <?php
-
+    require_once('settings.php');
     /* Landing page for checkout */
     //Make sure there are courses in the cart
     if(empty($_SESSION['OCE']['courses'])) {
@@ -19,12 +19,16 @@
 <!--
     intended to be embedded via an iframe
 -->
-    <form method="get" action="index.php">
+    <div id="checkout-form">
+    <form method="get" action="index.php" id="oce-form">
         <input type="hidden" name="source" value="iframe">
         <p>
-        To complete your registration, enter your email address below and click &quot;Check Out&quot;
-            You will be emailed a form momentarily.
+            Enter your name and email address below and click &quot;Check Out&quot;.
+            You will be sent a form in a few moments that you must complete and electronically sign.
         </p>
+        <label for="fullname">Please enter your full name:</label>
+        <input type="text" name="fullname" id="fullname">
+        <br/>
         <label for="checkout">
             Please enter your email:
         </label>
@@ -37,6 +41,17 @@
              <input type="hidden" name="iframe" value="true" >
         <?php } ?>
     </form>
+    </div>
+
+    <script>
+        $(document).ready(function(){
+            $('#oce-form').on('submit',function() {
+                $('#wait').show();
+                $('#checkout-form').hide();
+                return true;
+            });
+        });
+    </script>
 
 <?php
 require_once('templates/footer.php');

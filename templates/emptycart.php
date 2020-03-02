@@ -9,7 +9,7 @@ include('header.php');
     <small>This may happen if you wait a very long time to checkout.</small>
     </p>
     <br/>
-    <a href="https://www.umassd.edu/online/courses">Return to the Course List</a>
+    <a href="<?=OCE_HOME?>" target="_PARENT">Return to the Course List</a>
 </p>
 <?php
 include('footer.php');

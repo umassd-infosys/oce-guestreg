@@ -6,12 +6,28 @@ Feb 2020: initial release mpr
  */
 
 var oceGuestRegistration = {
-    courseURL: "https://umassd-postgres.herokuapp.com/oce-guestreg/cart.php",
+    //courseURL: "https://umassd-postgres.herokuapp.com/oce-guestreg/cart.php",
+    courseURL: "https://webapps.umassd.edu/herokurw/oce-guestreg/cart.php",
     checkoutURL: "https://www.umassd.edu/online/courses/registration",
     cart: {courses:[],n:0},
+    session_id: '',
     maxCourses: false,
     crns: [],
-    htmlStub: '<div class="oce-guestreg-cart" style="\'display:none"> <div class="oce-guestreg-cart-contents"> You have <span class="oce-guestreg-cart-contents-number"></span> course<span class="oce-guestreg-cart-contents-plural">s</span> in your cart: <div class="oce-guestreg-cart-contents-list"> </div> </div><div class="oce-guestreg-cart-checkout"> <a class="btn btn-auto-icon fa-shopping-cart btn-success oce-checkout btn-lg oce-guestreg-cart-checkout-link" href="https://www.umassd.edu/online/courses/registration"> Check Out </a> </div></div>',
+    htmlStub: '<div class="oce-guestreg-cart" style="display:none"> <div class="oce-guestreg-cart-contents"> You have <span class="oce-guestreg-cart-contents-number"></span> course<span class="oce-guestreg-cart-contents-plural">s</span> in your cart: <div class="oce-guestreg-cart-contents-list"> </div> </div><div class="oce-guestreg-cart-checkout"> <a class="btn btn-auto-icon fa-shopping-cart btn-success oce-checkout btn-lg oce-guestreg-cart-checkout-link" href="https://www.umassd.edu/online/courses/registration"> Check Out </a> </div></div>',
+    setCookie: function(key,value) {
+        var expires = new Date();
+        //Expire in one day
+        expires.setTime(expires.getTime() + (1 * 24 * 60 * 60 * 1000));
+        document.cookie = key + '=' + value + ';expires=' + expires.toUTCString();
+    },
+    getCookie: function(key) {
+        var keyValue = document.cookie.match('(^|;) ?' + key + '=([^;]*)(;|$)');
+        return keyValue ? keyValue[2] : null;
+    },
+    delCookie: function(key) {
+        var keyValue = getCookie(key);
+        oceGuestRegistration.setCookie(key, keyValue, '-1');
+    },
     addCourse: function(courseId) {
         if (oceGuestRegistration.maxCourses && oceGuestRegistration.cart.courses.length >= oceGuestRegistration.maxCourses) {
             var b = 'You may only register for ' + oceGuestRegistration.maxCourses + ' per transaction!';
@@ -87,10 +103,14 @@ var oceGuestRegistration = {
     },
     getCourses: function(callback) {
         try {
-            $.getJSON(oceGuestRegistration.courseURL+'?callback=?',function(jsonData){
+            $.getJSON(oceGuestRegistration.courseURL+'?callback=?',function(jsonData,success,xhr){
                 oceGuestRegistration.cart = jsonData;
                 if(jsonData.maxCourses) {
                     oceGuestRegistration.maxCourses = jsonData.maxCourses;
+                }
+                if(xhr && xhr) {
+                    console.log(xhr);
+                    window.x = xhr;
                 }
                 oceGuestRegistration.render();
                 if(callback && typeof callback == "function") {
@@ -147,7 +167,11 @@ var oceGuestRegistration = {
 };
 /* On initial document initialization, get the current courses */
 $(document).ready(function(){
-
+    $(document).ajaxSend(function (event, xhr, settings) {
+        settings.xhrFields = {
+            withCredentials: true
+        };
+    });
     oceGuestRegistration.getCourses(oceGuestRegistration.rewriteT4Page());
 
     /* On Registration Checkout Page */
